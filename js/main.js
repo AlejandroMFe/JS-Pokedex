@@ -2,24 +2,29 @@ const curso = "https://www.youtube.com/watch?v=drXkf_rytRs&t=2s"
 const URL = "https://pokeapi.co/api/v2/pokemon/"
 const listaPokemon = document.getElementById('listaPokemon');
 const btnHeaders = document.querySelectorAll('.btn-header');
-var allPokemon = [];
+const allPokemon = [];
 
+// Get all pokemon and save in allPokemon
 for (let i = 1; i < 152; i++) {
     fetch(URL + i)
         .then(response => response.json())
         .then(data => {
-            allPokemon.push(data)
             mostrarPokemon(data)
+            allPokemon.push(data)
         })
 }
 
 function mostrarPokemon(poke) {
+    
+    // Get types of this poke
     let tipos = poke.types.map(item =>
         `<p class="${item.type.name} tipo">${item.type.name}</p>`
     );
+
+    // Convert to string and add space between types
     tipos = tipos.join(" ");
 
-    // format id, out: 001 - 002 - 003
+    // Format id like: 001 - 002 - 003
     let pokeId = poke.id.toString().padStart(3, "0")
 
     const div = document.createElement("div")
@@ -48,29 +53,33 @@ function mostrarPokemon(poke) {
     listaPokemon.append(div)
 }
 
-// ToDo: filter by type
+// Add event listener to all btns to filter by type
 btnHeaders.forEach(btn => btn.addEventListener('click',
     function (event) {
-        const btnFilter = event.target.id; // out: fire
+
+        // Get filter type from btn.id like: fire
+        const btnFilter = event.target.id;
+
+        // Clean the pokemon list
+        listaPokemon.innerHTML = "";
 
         if (btnFilter === "ver-todos") {
-            listaPokemon.innerHTML = "";
             allPokemon.forEach(poke => mostrarPokemon(poke))
             return;
         }
 
-        const filterPokemon = allPokemon.map(poke => {
+        // Filter by types
+        allPokemon.forEach(poke => {
 
-            var pokeTypes = poke.types.map(item => item.type.name)
-            console.log(pokeTypes)
+            // get types of this poke
+            const pokeTypes = poke.types.map(item => item.type.name)
+            // out: ['rock', 'water']
 
-            if (pokeTypes.some(type => type.includes(btnFilter))) {
-                return poke;
+            // check if btnFilter is in pokeTypes then mostrarPokemon(poke)
+            if (pokeTypes.includes(btnFilter)) {
+                mostrarPokemon(poke)
             }
-        });
+        })
 
-        console.log(filterPokemon)
-
-        listaPokemon.innerHTML = "";
-        filterPokemon.forEach(poke => mostrarPokemon(poke))
-    }));
+    })
+);
